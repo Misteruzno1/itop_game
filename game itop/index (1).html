@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>iTop Bozori</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{--bg:#0e2a2f;--card:#173a40;--line:#25555c;--ink:#f4efe3;--mute:#9db8b8;--gold:#f4b63f;--coral:#ee6c4d;--sh:#0a1d21}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-top:env(safe-area-inset-top,0);overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column}
+.top{display:flex;gap:8px;align-items:center;padding:12px 16px}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:7px 14px;font-weight:700;font-size:15px}
+.top .sp{flex:1}
+main{flex:1;overflow-y:auto;padding:34px 16px 110px}
+h1{font-size:26px;line-height:1.15;margin:8px 0 6px}
+h2{font-size:17px;margin-bottom:8px}
+p.m{color:var(--mute);font-size:14px;line-height:1.4}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px}
+.btn{width:100%;border:0;border-radius:14px;padding:15px;font-size:16px;font-weight:800;background:var(--gold);color:#2b1d00;box-shadow:0 4px 0 #b8841c;cursor:pointer}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #b8841c}
+.btn.off{opacity:.5}
+.btn:disabled{opacity:.45;box-shadow:none}
+.btn.alt{background:var(--coral);color:#fff;box-shadow:0 4px 0 #a8452c}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.opt{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 4px;text-align:center;font-size:13px;font-weight:600;cursor:pointer}
+.opt span{display:block;font-size:34px;margin-bottom:4px}
+.opt.on{border-color:var(--gold);background:#24494a}
+.dots{display:flex;gap:6px;margin-bottom:14px}.dots i{flex:1;height:5px;border-radius:9px;background:var(--line)}.dots i.on{background:var(--gold)}
+input{width:100%;background:var(--card);border:2px solid var(--line);color:var(--ink);border-radius:14px;padding:14px;font-size:17px;font-weight:600;outline:0}
+input:focus{border-color:var(--gold)}
+.colors{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:14px 0}
+.sw{aspect-ratio:1;border-radius:50%;border:4px solid transparent;cursor:pointer}.sw.on{border-color:#fff}
+.row{display:flex;gap:10px;margin-top:14px}.row>*{flex:1}
+.shop{margin:0 auto;width:210px;text-align:center}
+.sign{background:#fff;color:#1b2b2b;border-radius:10px 10px 0 0;padding:8px 6px;font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.awn{height:24px;background:repeating-linear-gradient(90deg,#fff 0 24px,var(--aw,#4cc9f0) 24px 48px);border-radius:0 0 14px 14px}
+.body{height:96px;background:var(--c);display:flex;align-items:center;justify-content:center;font-size:48px;border-radius:0 0 10px 10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.st{background:var(--sh);border-radius:12px;padding:10px 4px;text-align:center}.st b{display:block;font-size:20px}.st small{color:var(--mute);font-size:12px}
+.bar{height:10px;background:var(--sh);border-radius:9px;overflow:hidden;margin:10px 0}.bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .3s}
+.cust{font-size:30px;letter-spacing:4px;text-align:center;margin:8px 0 12px;height:40px;overflow:hidden}
+nav{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0));background:var(--card);border:1px solid var(--line);border-radius:22px;display:flex;padding:6px}
+nav button{flex:1;background:0;border:0;color:var(--mute);font-size:11px;font-weight:700;padding:6px 0;border-radius:16px;cursor:pointer}
+nav button span{display:block;font-size:22px}nav button.on{background:#24494a;color:var(--gold)}
+.fl{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:var(--gold);color:#2b1d00;font-weight:800;padding:8px 16px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none;z-index:9}.fl.show{opacity:1}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:2px solid var(--gold);border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0));z-index:5;box-shadow:0 -20px 40px rgba(0,0,0,.45)}
+#city{position:fixed;inset:0;z-index:0;display:none;touch-action:none}
+#city canvas{display:block;width:100%;height:100%}
+#app{position:relative;z-index:1}
+body.city:not(.wide) #app{pointer-events:none}
+body.city .top,body.city nav,body.city .sheet,body.city .hint,body.city .fab{pointer-events:auto}
+.hint{position:fixed;left:16px;bottom:96px;background:rgba(255,255,255,.92);color:#1b2b2b;border-radius:99px;padding:9px 14px;font-weight:700;font-size:13px;z-index:2}
+.fab{position:fixed;right:16px;width:52px;height:52px;border-radius:16px;border:0;background:#fff;font-size:24px;z-index:2;box-shadow:0 4px 0 #cfc7b4}
+.soon{text-align:center;padding:60px 20px}.soon span{font-size:60px}
+#tk{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:4;pointer-events:none;font-size:11px;font-weight:700;background:rgba(10,29,33,.85);border:1px solid var(--line);border-radius:12px;padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none}
+#tk .ev{color:var(--gold)}
+.lb{display:flex;gap:10px;align-items:center;margin-top:8px!important;padding:10px 14px!important}
+.lb .n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Kompyuter: chapda panel, o'ngda shahar */
+body.wide #app{position:fixed;left:0;top:0;bottom:0;width:440px;background:var(--bg);border-right:1px solid var(--line);z-index:3}
+body.wide #city{left:440px}
+body.wide nav{left:12px;right:auto;width:416px}
+body.wide #tk{left:12px;right:auto;width:416px}
+body.wide .hint{left:456px;bottom:20px}
+body.wide .fab{right:20px}
+body.wide .sheet{left:456px;right:16px;bottom:16px;max-width:460px;border:2px solid var(--gold);border-radius:24px}
+</style>
+</head>
+<body>
+<div id="city"></div>
+<div id="app"></div>
+<div id="tk"></div>
+<div class="fl" id="fl"></div>
+<script>
+const tg=window.Telegram&&Telegram.WebApp;if(tg){tg.ready();tg.expand();}
+const TYPES=[["👕","Kiyim"],["👟","Poyabzal"],["📱","Telefonlar"],["🎮","O'yinlar"],["💻","Kompyuter"],["🍽️","Restoran"],["☕","Kafe"],["🍔","Fast food"],["🛒","Market"],["🚗","Avto"],["⚽","Sport"],["💐","Gullar"],["📚","Kitoblar"],["💍","Zargarlik"],["🧸","O'yinchoqlar"],["💄","Kosmetika"]];
+const COLORS=["#ff8a8a","#ffb04c","#ffd24c","#4cc9f0","#b39bff","#7fe0a0","#ff9bd9","#5eb8ff","#ff9f6e","#c1e862"];
+const KEY="itop_v1";
+const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
+const qn=new URLSearchParams(location.search).get("n")||"";
+const fullName=[tu.first_name,tu.last_name].filter(Boolean).join(" ")||qn||tu.username||"Mehmon";
+const user={first_name:fullName};
+let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+S=S||{coins:100,floors:1,visits:0,likes:0,shop:null,cash:0,lastCash:Date.now()};
+S.uid=S.uid||Math.random().toString(36).slice(2,10);
+const myId=tu.id?"t"+tu.id:"w"+S.uid;
+const PLOTS=(()=>{const a=[];for(let i=-4;i<=4;i++)for(let j=-4;j<=4;j++){if((i==0&&j==0)||(i==-1&&(j==-1||j==1)))continue;a.push({i,j,x:i*20,z:j*20,d:i*i+j*j})}a.sort((p,q)=>p.d-q.d);return a.slice(0,50)})();
+const DEF=PLOTS.findIndex(p=>p.i==1&&p.j==0);
+S.plot=S.plot??DEF;S.q=S.q??2;S.qt=S.qt??Date.now();
+const QMAX=30,EVERY=15000,PER=2;
+const wide=()=>innerWidth>=900;
+let tab="shop",step=0,draft={type:null,name:"",color:0},sel=null;
+function arrive(){const now=Date.now();if(S.q>=QMAX){S.qt=now;return}const n=Math.floor((now-S.qt)/EVERY);if(n>0){S.q=Math.min(QMAX,S.q+PER*n);S.qt=S.q>=QMAX?now:S.qt+n*EVERY}}
+const PEOPLE=["🧑","👩","👨","🧓","🧔","👧","👦"];
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const floorCost=()=>Math.round(40*Math.pow(1.15,S.floors-1));
+const cap=()=>50+S.floors*2;
+function flash(t){const f=document.getElementById("fl");f.textContent=t;f.classList.add("show");setTimeout(()=>f.classList.remove("show"),1200);tg&&tg.HapticFeedback&&tg.HapticFeedback.impactOccurred("light");}
+function accrue(){const now=Date.now(),h=Math.min((now-S.lastCash)/36e5,8);S.cash=Math.min(cap(),S.cash+h*S.floors*1.5);S.lastCash=now;}
+function shopHTML(t,n,c){return `<div class="shop"><div class="sign">${t} ${esc(n||"Do'kon nomi")}</div><div class="awn" style="--aw:${c==="#4cc9f0"?"#ee6c4d":"#4cc9f0"}"></div><div class="body" style="--c:${c}">${t}</div></div>`}
+function head(){return `<div class="top"><div class="pill">🪙 ${Math.floor(S.coins)}</div><div class="pill">🏢 ${S.floors}</div><div class="sp"></div><div class="pill">${esc(user.first_name)}</div></div>`}
+
+/* ===== MULTIPLAYER ===== */
+let ALL=[],prev=null,ev="",evT=0,onl=1;
+const meObj=()=>({id:myId,name:fullName,shop:S.shop.name,type:S.shop.type,color:S.shop.color,floors:S.floors,plot:S.plot??DEF});
+const players=()=>ALL.filter(p=>p.id!==myId).concat(S.shop?[meObj()]:[]).sort((a,b)=>b.floors-a.floors);
+async function sync(){
+ try{
+  const b=S.shop?{id:myId,name:fullName,shop:S.shop.name,type:S.shop.type,color:S.shop.color,floors:S.floors,init:(tg&&tg.initData)||""}:{};
+  const r=await fetch("/api/sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
+  const d=await r.json();ALL=d.players||[];
+  const me=ALL.find(p=>p.id===myId);
+  if(me){if(me.plot>=0)S.plot=me.plot;if(me.floors>S.floors){S.floors=me.floors;save();if(tab=="shop")render(true)}}
+  const m={};onl=1;
+  ALL.forEach(p=>{if(p.id===myId)return;m[p.id]=p.floors;if(d.now-p.ts<20)onl++;
+   if(prev){if(prev[p.id]===undefined)say(p.name+" bozorga qo'shildi 👋");else if(p.floors>prev[p.id])say(p.name+" "+p.floors+"-qavatga chiqdi 🏢")}});
+  prev=m;tick();
+  const lb=document.getElementById("lb");if(lb)lb.innerHTML=lbHTML();
+  if(T3&&S.shop)syncShops();
+ }catch(e){}
+}
+function say(t){ev=t;clearTimeout(evT);evT=setTimeout(()=>{ev="";tick()},5000)}
+function tick(){const el=document.getElementById("tk");if(!el)return;if(!S.shop){el.style.display="none";return}
+ el.style.display="block";
+ el.innerHTML=(ev?`<div class="ev">📣 ${esc(ev)}</div>`:"")+`<div>👥 ${onl} · `+players().slice(0,5).map((p,i)=>["🥇","🥈","🥉","4.","5."][i]+esc(p.name.slice(0,10))+" "+p.floors).join(" · ")+`</div>`}
+function lbHTML(){return players().map((p,i)=>`<div class="card lb" ${p.id===myId?'style="border-color:var(--gold)"':""}><b style="width:28px">${i<3?["🥇","🥈","🥉"][i]:i+1}</b><span class="n">${esc(p.name)} <small class="m">${esc(p.shop)}</small></span><b>🏢 ${p.floors}</b></div>`).join("")}
+function ratingPage(){return `<main><h1>🏆 Reyting</h1><p class="m">Barcha o'yinchilar qavat bo'yicha</p><div id="lb">${lbHTML()}</div></main>`}
+
+/* ===== O'YIN ===== */
+function onboarding(){
+ const d=`<div class="dots">${[0,1,2].map(i=>`<i class="${i<=step?"on":""}"></i>`).join("")}</div>`;
+ let b="";
+ if(step==0){b=`<h1>Salom, ${esc(user.first_name)}! 👋</h1><p class="m">iTop Bozorida o'z do'koningni och — bepul. Qanday do'kon ochasan?</p><div class="grid">${TYPES.map((t,i)=>`<div class="opt ${draft.type===i?"on":""}" onclick="draft.type=${i};render()"><span>${t[0]}</span>${t[1]}</div>`).join("")}</div><button class="btn" ${draft.type===null?"disabled":""} onclick="step=1;render()">Davom etish</button>`}
+ if(step==1){const t=TYPES[draft.type][0];b=`<h1>Do'koningga nom qo'y</h1><div class="card">${shopHTML(t,draft.name,COLORS[draft.color])}</div><div style="margin-top:14px"><input id="nm" maxlength="24" placeholder="Masalan: Ali Shop" value="${esc(draft.name)}" oninput="draft.name=this.value;document.querySelector('.sign').textContent='${t} '+(this.value||'Do\\'kon nomi');document.getElementById('go').disabled=this.value.trim().length<2"></div><div class="row"><button class="btn ghost" style="flex:0 0 64px" onclick="step=0;render()">←</button><button id="go" class="btn" ${draft.name.trim().length<2?"disabled":""} onclick="step=2;render()">Davom etish</button></div>`}
+ if(step==2){const t=TYPES[draft.type][0];b=`<h1>Rangini tanla</h1><div class="card">${shopHTML(t,draft.name,COLORS[draft.color])}</div><div class="colors">${COLORS.map((c,i)=>`<div class="sw ${draft.color===i?"on":""}" style="background:${c}" onclick="draft.color=${i};render()"></div>`).join("")}</div><div class="row"><button class="btn ghost" style="flex:0 0 64px" onclick="step=1;render()">←</button><button class="btn alt" onclick="openShop()">🎉 Do'konni ochish</button></div>`}
+ return `<main>${d}${b}</main>`}
+function openShop(){S.shop={type:draft.type,name:draft.name.trim(),color:draft.color};S.coins+=50;S.lastCash=Date.now();save();flash("Do'kon ochildi! +50 🪙");sync();render()}
+function shopPage(){
+ accrue();arrive();const s=S.shop,t=TYPES[s.type];const pct=Math.round(S.cash/cap()*100);
+ return `<main><div class="card">${shopHTML(t[0],s.name,COLORS[s.color])}<div style="text-align:center;margin-top:12px"><b style="font-size:20px">${esc(s.name)}</b><p class="m">${t[1]} · ${esc(user.first_name)}</p></div>
+ <div class="stats"><div class="st"><b>${S.floors}</b><small>qavat</small></div><div class="st"><b>${S.likes}</b><small>layk</small></div><div class="st"><b>${S.visits}</b><small>xaridor</small></div></div></div>
+ <div class="card"><h2>🛍️ Xaridorlar <span class="m" id="qn" style="float:right;font-weight:600"></span></h2><div class="cust" id="cu"></div><button class="btn alt" id="sv" onclick="serve()">🤝 Xizmat ko'rsatish +3 🪙</button><p class="m" id="nx" style="text-align:center;margin-top:10px"></p></div>
+ <div class="card"><h2>💰 Kassa</h2><b style="font-size:26px" id="ca">${Math.floor(S.cash)}</b> <span class="m">/ ${cap()}</span><div class="bar"><i id="cb" style="width:${pct}%"></i></div><button class="btn" onclick="collect()">Yig'ish</button><p class="m" style="margin-top:8px">Do'kon sen yo'qligingda ham ishlaydi (8 soatgacha). Qavat ko'p — kassa tez to'ladi.</p></div>
+ <div class="card"><h2>🏗️ Qavat qurish</h2><p class="m">Keyingi (${S.floors+1}-) qavat: 🪙 ${floorCost()}</p><div class="row">${[1,5,10].map(n=>`<button class="btn ${n==1?"":"alt"} ${S.coins<floorsCost(n)?"off":""}" style="padding:12px 4px" onclick="build(${n})">+${n}<br><small>🪙 ${floorsCost(n)}</small></button>`).join("")}</div><p class="m" style="margin-top:10px">🏠 Uylar: ${houses()} / 7 · har 5 qavatda +1 uy ochiladi<br>📍 Joy №${(S.plot??DEF)+1} / 50</p></div></main>`}
+function serve(){arrive();if(S.q<1)return flash("Xaridor yo'q, kuting");S.q--;S.coins+=3;S.visits++;save();flash("+3 🪙");ui();document.querySelector(".top .pill").textContent="🪙 "+Math.floor(S.coins)}
+function ui(){const cu=document.getElementById("cu");if(!cu)return;arrive();
+ cu.textContent=S.q?PEOPLE.slice(0,Math.min(S.q,7)).join(""):"⏳";
+ document.getElementById("qn").textContent=S.q+" / "+QMAX+" navbatda";
+ document.getElementById("sv").disabled=S.q<1;
+ const left=S.q>=QMAX?null:Math.max(0,Math.ceil((EVERY-(Date.now()-S.qt))/1000));
+ document.getElementById("nx").textContent=left===null?"Navbat to'la — xaridorlarga xizmat ko'rsating":"Keyingi "+PER+" xaridor: 0:"+String(left).padStart(2,"0");
+ const a=document.getElementById("ca"),c=document.getElementById("cb");if(a){accrue();a.textContent=Math.floor(S.cash);c.style.width=Math.round(S.cash/cap()*100)+"%"}}
+function collect(){accrue();const g=Math.floor(S.cash);if(g<1)return flash("Kassa hali bo'sh");S.coins+=g;S.cash-=g;save();flash("+"+g+" 🪙");render(true)}
+const houses=(f)=>Math.min(7,Math.floor((f??S.floors)/5));
+function floorsCost(n){let t=0;for(let k=0;k<n;k++)t+=Math.round(40*Math.pow(1.15,S.floors-1+k));return t}
+function build(n){n=n||1;const c=floorsCost(n);if(S.coins<c)return flash("Yetmaydi: yana "+(c-Math.floor(S.coins))+" 🪙 kerak");S.coins-=c;const h0=houses();S.floors+=n;save();flash(houses()>h0?"Yangi uy qo'shildi! 🏠":"+"+n+" qavat! 🏢");render(true);sync()}
+function sheet(){
+ const me=sel===myId,p=me?meObj():ALL.find(x=>x.id===sel);if(!p)return"";
+ return `<div class="sheet"><div class="card" style="margin-top:0">${shopHTML(TYPES[p.type][0],p.shop,COLORS[p.color])}<div style="text-align:center;margin-top:10px"><b>${esc(p.shop)}</b><p class="m">👤 ${esc(p.name)} · 🏢 ${p.floors} qavat · 🏠 ${houses(p.floors)} uy</p></div></div>${me?`<div class="row"><button class="btn" onclick="tab='shop';sel=null;render()">Do'konimga o'tish</button></div>`:""}<button class="btn ghost" style="margin-top:10px" onclick="sel=null;render(true)">Yopish</button></div>`}
+function soon(n,e){return `<main><div class="soon"><span>${e}</span><h1>${n}</h1><p class="m">Bu bo'lim tez orada ochiladi.</p></div></main>`}
+const TABS=[["bozor","🏙️","Bozor"],["shop","🏪","Do'konim"],["vaz","🎯","Vazifalar"],["rey","🏆","Reyting"],["mkt","🤝","Market"]];
+function render(keep){
+ const app=document.getElementById("app");document.body.classList.toggle("wide",wide());
+ if(!S.shop){showCity(false);tick();app.innerHTML=head().replace(/<div class="pill">🏢.*?<\/div>/,"")+onboarding();return}
+ let m;const sc=document.querySelector("main");const y=sc?sc.scrollTop:0;
+ if(tab=="shop")m=shopPage();else if(tab=="bozor")m=(wide()?ratingPage():"")+`<div class="hint">👆 Do'konni bos · ✌️ aylantir</div><button class="fab" style="bottom:166px" onclick="camShop()">📍</button><button class="fab" style="bottom:106px" onclick="camTo(0,8,0,75)">🗼</button>`;else if(tab=="vaz")m=soon("Vazifalar","🎯");else if(tab=="rey")m=ratingPage();else m=soon("Market","🤝");
+ app.innerHTML=head()+m+`<nav>${TABS.map(t=>`<button class="${tab==t[0]?"on":""}" onclick="tab='${t[0]}';sel=null;render()"><span>${t[1]}</span>${t[2]}</button>`).join("")}</nav>`+(sel!==null&&tab=="bozor"?sheet():"");
+ const n=document.querySelector("main");if(n&&keep)n.scrollTop=y;showCity(tab=="bozor");tick();if(tab=="shop")ui();
+}
+setInterval(()=>{if(S.shop&&tab=="shop")ui()},1000);
+setInterval(sync,2500);
+let W0=wide();addEventListener("resize",()=>{if(wide()!==W0){W0=wide();render(true)}else if(T3)T3.fit()});
+
+/* ===== 3D SHAHAR ===== */
+let T3=null;
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+function winTex(col,rx,ry,win){const c=document.createElement("canvas");c.width=c.height=64;const g=c.getContext("2d");g.fillStyle=col;g.fillRect(0,0,64,64);g.fillStyle=win||"#fff3c4";g.fillRect(9,18,18,26);g.fillRect(37,18,18,26);g.fillStyle="rgba(0,0,0,.28)";g.fillRect(0,60,64,4);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);return t}
+function stripeTex(col){const c=document.createElement("canvas");c.width=64;c.height=16;const g=c.getContext("2d");for(let i=0;i<8;i++){g.fillStyle=i%2?col:"#fff";g.fillRect(i*8,0,8,16)}const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;t.repeat.set(3,1);return t}
+function textTex(txt,bg,fg,w,h,fs){const c=document.createElement("canvas");c.width=w;c.height=h;const g=c.getContext("2d");g.fillStyle=bg;g.beginPath();g.roundRect?g.roundRect(4,4,w-8,h-8,h/3):g.rect(4,4,w-8,h-8);g.fill();g.fillStyle=fg;g.font="800 "+fs+"px system-ui,sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText(txt,w/2,h/2+2);return new THREE.CanvasTexture(c)}
+function tree(x,z,sc){const g=new THREE.Group();const t=new THREE.Mesh(new THREE.CylinderGeometry(.18,.22,1,6),new THREE.MeshLambertMaterial({color:0x7a5230}));t.position.y=.5;const k=new THREE.Mesh(new THREE.ConeGeometry(1.1,2.8,7),new THREE.MeshLambertMaterial({color:0x4fae5c}));k.position.y=2.3;g.add(t,k);g.position.set(x,0,z);g.scale.setScalar(sc||1);return g}
+function mkPerson(){const g=new THREE.Group();const c=[0xff8a8a,0x4cc9f0,0xffd24c,0xb39bff,0x7fe0a0][Math.random()*5|0];const b=new THREE.Mesh(new THREE.CylinderGeometry(.25,.3,.8,8),new THREE.MeshLambertMaterial({color:c}));b.position.y=.4;const h=new THREE.Mesh(new THREE.SphereGeometry(.26,8,8),new THREE.MeshLambertMaterial({color:0xffd9b3}));h.position.y=1.05;g.add(b,h);g.userData={tx:20,tz:5,sp:.015+Math.random()*.02};return g}
+function initCity(){
+ const wrap=document.getElementById("city"),W=wrap.clientWidth||innerWidth,H=wrap.clientHeight||innerHeight;
+ const r=new THREE.WebGLRenderer({antialias:true});r.setPixelRatio(Math.min(devicePixelRatio||1,2));r.setSize(W,H);wrap.appendChild(r.domElement);
+ const sc=new THREE.Scene();sc.background=new THREE.Color(0xa8d8ff);sc.fog=new THREE.Fog(0xa8d8ff,140,420);
+ const cam=new THREE.PerspectiveCamera(50,W/H,.5,900);
+ sc.add(new THREE.HemisphereLight(0xffffff,0x88aa77,.95));const sun=new THREE.DirectionalLight(0xffffff,.7);sun.position.set(30,50,20);sc.add(sun);
+ const M=c=>new THREE.MeshLambertMaterial({color:c});
+ const gr=new THREE.Mesh(new THREE.PlaneGeometry(1600,1600),M(0xbfe0a0));gr.rotation.x=-Math.PI/2;sc.add(gr);
+ const rd=new THREE.Mesh(new THREE.PlaneGeometry(200,200),M(0x6e6d84));rd.rotation.x=-Math.PI/2;rd.position.y=.02;sc.add(rd);
+ const pal=[0xf3e6a5,0xcfe8b3,0xe6dccb];let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ const nums=[];
+ for(let i=-4;i<=4;i++)for(let j=-4;j<=4;j++){if(i==0&&j==0)continue;const pi=PLOTS.findIndex(p=>p.i==i&&p.j==j);const sl=new THREE.Mesh(new THREE.BoxGeometry(14,.3,14),M(pi>=0?pal[(i+j+9)%3]:0xcfe8b3));sl.position.set(i*20,.15,j*20);sc.add(sl);
+  if(pi>=0){const nl=new THREE.Mesh(new THREE.PlaneGeometry(7,3.5),new THREE.MeshBasicMaterial({map:textTex("№"+(pi+1),"#fff6c9","#7a5a00",256,128,72)}));nl.rotation.x=-Math.PI/2;nl.position.set(i*20,.33,j*20);sc.add(nl);nums[pi]=nl}
+  else if(!(i==-1&&(j==-1||j==1))&&rnd()<.7)sc.add(tree(i*20+(rnd()-.5)*8,j*20+(rnd()-.5)*8,.8+rnd()*.5))}
+ const pl=new THREE.Mesh(new THREE.CylinderGeometry(8.5,8.5,.4,40),M(0xf4efe3));pl.position.y=.2;sc.add(pl);
+ for(let k=0;k<14;k++){const a=k/14*Math.PI*2;sc.add(tree(Math.cos(a)*7,Math.sin(a)*7,.9))}
+ const tw=new THREE.Group();const tm=new THREE.MeshLambertMaterial({map:winTex("#2f5d9e",3,22,"#ffe9a8")}),tp=M(0x2f5d9e);
+ const tb=new THREE.Mesh(new THREE.BoxGeometry(7,26,7),[tm,tm,tp,tp,tm,tm]);tb.position.y=13.4;tw.add(tb);
+ const rf=new THREE.Mesh(new THREE.BoxGeometry(7.6,1,7.6),M(0xee6c4d));rf.position.y=26.9;tw.add(rf);
+ const an=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,5,6),M(0xdddddd));an.position.y=29.9;tw.add(an);
+ const st=textTex("iTOP","#f4b63f","#2b1d00",512,160,110);[[0,3.6,0],[3.6,0,Math.PI/2],[0,-3.6,Math.PI],[-3.6,0,-Math.PI/2]].forEach(a=>{const sg=new THREE.Mesh(new THREE.PlaneGeometry(6,1.9),new THREE.MeshBasicMaterial({map:st}));sg.position.set(a[0],20,a[1]);sg.rotation.y=a[2];tw.add(sg)});
+ sc.add(tw);
+ for(let k=0;k<26;k++){const a=k/26*Math.PI*2+rnd()*.2,R=270+rnd()*50,hh=45+rnd()*55,w=40+rnd()*30;const m=new THREE.Mesh(new THREE.ConeGeometry(w,hh,6),M(0x8fa3c9));m.position.set(Math.cos(a)*R,hh/2,Math.sin(a)*R);sc.add(m);const cp=new THREE.Mesh(new THREE.ConeGeometry(w*.3,hh*.3,6),M(0xffffff));cp.position.set(m.position.x,hh*.85,m.position.z);sc.add(cp)}
+ const lbl=(txt,x,y,z)=>{const l=new THREE.Sprite(new THREE.SpriteMaterial({map:textTex(txt,"#ffffff","#1b2b2b",512,128,56),depthTest:false}));l.scale.set(8,2,1);l.position.set(x,y,z);sc.add(l)};
+ const mkCar=c=>{const g=new THREE.Group();const b=new THREE.Mesh(new THREE.BoxGeometry(2.4,.8,1.2),M(c));b.position.y=.6;const cb=new THREE.Mesh(new THREE.BoxGeometry(1.2,.6,1),M(0xcfe9ff));cb.position.set(-.1,1.2,0);g.add(b,cb);return g};
+ const carCols=[0xee6c4d,0xf4b63f,0x4cc9f0,0xffffff,0x7fe0a0,0xb39bff,0x333344];
+ const ms=new THREE.Group();ms.position.set(-20,.3,-20);
+ const mb=new THREE.Mesh(new THREE.BoxGeometry(10,4.5,8),M(0xf5eedd));mb.position.y=2.25;
+ const dm=new THREE.Mesh(new THREE.SphereGeometry(3.2,24,14,0,Math.PI*2,0,Math.PI/2),M(0x2fa39b));dm.position.y=4.5;
+ const dt=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,1.6,6),M(0xf4b63f));dt.position.y=8.4;
+ const dr=new THREE.Mesh(new THREE.BoxGeometry(2,2.8,.2),M(0x5b3a1e));dr.position.set(0,1.4,4.05);
+ ms.add(mb,dm,dt,dr);
+ [[-5.6,-3.4],[5.6,-3.4]].forEach(q=>{const mn=new THREE.Mesh(new THREE.CylinderGeometry(.55,.7,12,10),M(0xf5eedd));mn.position.set(q[0],6,q[1]);const rg=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,.3,10),M(0x2fa39b));rg.position.set(q[0],9.5,q[1]);const tp=new THREE.Mesh(new THREE.ConeGeometry(.7,2.2,10),M(0x2fa39b));tp.position.set(q[0],13,q[1]);const bl=new THREE.Mesh(new THREE.SphereGeometry(.18,8,8),M(0xf4b63f));bl.position.set(q[0],14.2,q[1]);ms.add(mn,rg,tp,bl)});
+ sc.add(ms);lbl("🕌 Masjid",-20,17,-20);
+ const pk=new THREE.Group();pk.position.set(-20,.3,20);
+ const as=new THREE.Mesh(new THREE.BoxGeometry(13,.12,13),M(0x4a4a5c));as.position.y=.06;pk.add(as);
+ for(let k=0;k<6;k++)[-3.5,3.5].forEach(z=>{const ln=new THREE.Mesh(new THREE.BoxGeometry(.12,.02,3.2),M(0xffffff));ln.position.set(-5+k*2,.14,z);pk.add(ln)});
+ for(let k=0;k<5;k++)[-3.5,3.5].forEach((z,zi)=>{if((k+zi*2)%4==3)return;const c=mkCar(carCols[(k*2+zi)%7]);c.rotation.y=Math.PI/2;c.position.set(-4+k*2,.12,z);pk.add(c)});
+ sc.add(pk);lbl("🅿️ Parkovka",-20,5,20);
+ const cars=[];
+ for(let k=0;k<24;k++){const ax=k%2?"x":"z",dir=(k>>1)%2?1:-1,line=[-70,-50,-30,-10,10,30,50,70][(k*3+(k>>2))%8];const c=mkCar(carCols[k%7]);c.userData={ax,dir,sp:.12+rnd()*.1};
+  if(ax=="x"){c.position.set(rnd()*180-90,.03,line+dir*1.6);c.rotation.y=dir>0?0:Math.PI}else{c.position.set(line+dir*1.6,.03,rnd()*180-90);c.rotation.y=dir>0?-Math.PI/2:Math.PI/2}
+  sc.add(c);cars.push(c)}
+ const people=new THREE.Group();sc.add(people);
+ const fit=()=>{const w=wrap.clientWidth||innerWidth,h=wrap.clientHeight||innerHeight;r.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()};
+ T3={r,sc,cam,people,cars,nums,sh:new Map(),px:20,pz:0,off:3.8,hit:[],az:.35,pol:1,rad:52,t:new THREE.Vector3(10,5,0),n:0,on:false,run:false,fit};
+ const d=r.domElement,P=new Map();let moved=0,pd=0;
+ const dist=()=>{const a=[...P.values()];return Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])||1};
+ d.onpointerdown=e=>{d.setPointerCapture(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);moved=0;if(P.size==2)pd=dist()};
+ d.onpointermove=e=>{const o=P.get(e.pointerId);if(!o)return;const dx=e.clientX-o[0],dy=e.clientY-o[1];P.set(e.pointerId,[e.clientX,e.clientY]);moved+=Math.abs(dx)+Math.abs(dy);if(P.size==1){T3.az-=dx*.006;T3.pol=clamp(T3.pol-dy*.005,.35,1.45)}else if(P.size==2){const nd=dist();T3.rad=clamp(T3.rad*pd/nd,14,140);pd=nd}};
+ d.onpointerup=e=>{const was=P.size;P.delete(e.pointerId);if(was==1&&moved<8){const b=d.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((e.clientX-b.left)/b.width*2-1,-((e.clientY-b.top)/b.height)*2+1),T3.cam);const h=ray.intersectObjects(T3.hit);if(h.length){sel=h[0].object.userData.pid;render(true)}}};
+ d.onpointercancel=e=>P.delete(e.pointerId);
+ d.onwheel=e=>{T3.rad=clamp(T3.rad+e.deltaY*.05,14,140)};
+}
+function buildShop(g,p){
+ g.clear();const P=PLOTS[p.plot]||PLOTS[DEF];g.position.set(P.x,.3,P.z);
+ const f=p.floors,nh=houses(f),h=f*1.8,col=COLORS[p.color],hit=[];
+ const sm=new THREE.MeshLambertMaterial({map:winTex(col,1,f)}),pm=new THREE.MeshLambertMaterial({color:col});
+ const body=new THREE.Mesh(new THREE.BoxGeometry(5,h,5),[sm,sm,pm,pm,sm,sm]);body.position.y=h/2;
+ const roof=new THREE.Mesh(new THREE.BoxGeometry(5.4,.5,5.4),new THREE.MeshLambertMaterial({color:0xee6c4d}));roof.position.y=h+.25;
+ const aw=new THREE.Mesh(new THREE.BoxGeometry(5.4,.25,1.8),new THREE.MeshLambertMaterial({map:stripeTex("#4cc9f0")}));aw.position.set(0,1.5,3);
+ const nm=p.shop.length>12?p.shop.slice(0,11)+"…":p.shop;
+ const lb=new THREE.Sprite(new THREE.SpriteMaterial({map:textTex(TYPES[p.type][0]+" "+nm+" · "+f+" qavat","#ffffff","#1b2b2b",512,128,46),depthTest:false}));lb.scale.set(9,2.25,1);lb.position.y=h+2.6;
+ g.add(body,roof,aw,lb);hit.push(body,roof,aw);
+ const sp=[[-5,-5],[0,-5.3],[5,-5],[-5.2,-.5],[5.2,-.5],[-5.2,2.2],[5.2,2.2]],hc=[0xffd24c,0xff9bd9,0x7fe0a0,0xb39bff,0xffb04c,0x5eb8ff,0xc1e862];
+ for(let i=0;i<nh;i++){const hh=2+(i%3)*.8,hs=new THREE.Group();hs.position.set(sp[i][0],0,sp[i][1]);
+  const hb=new THREE.Mesh(new THREE.BoxGeometry(2.4,hh,2.4),new THREE.MeshLambertMaterial({map:winTex("#"+hc[i].toString(16).padStart(6,"0"),1,Math.max(1,Math.round(hh/1.3)))}));hb.position.y=hh/2;
+  const hr=new THREE.Mesh(new THREE.ConeGeometry(2,1.1,4),new THREE.MeshLambertMaterial({color:0xee6c4d}));hr.position.y=hh+.55;hr.rotation.y=Math.PI/4;
+  hs.add(hb,hr);g.add(hs);hit.push(hb,hr)}
+ hit.forEach(m=>m.userData.pid=p.id);g.userData.h=hit;
+}
+function syncShops(){
+ if(!T3||!S.shop)return;
+ const me=meObj(),L=ALL.filter(p=>p.id!==myId&&p.plot>=0).concat([me]);
+ const ids=new Set(L.map(p=>p.id)),occ=new Set(L.map(p=>p.plot));
+ for(const [id,o] of [...T3.sh]){if(!ids.has(id)){T3.sc.remove(o.g);T3.sh.delete(id)}}
+ L.forEach(p=>{const k=[p.floors,p.shop,p.color,p.type,p.plot].join("|");let o=T3.sh.get(p.id);if(!o){o={g:new THREE.Group(),k:""};T3.sc.add(o.g);T3.sh.set(p.id,o)}if(o.k!==k){o.k=k;buildShop(o.g,p)}});
+ T3.nums.forEach((n,i)=>{if(n)n.visible=!occ.has(i)});
+ T3.hit=[];T3.sh.forEach(o=>(o.g.userData.h||[]).forEach(m=>T3.hit.push(m)));
+ const P=PLOTS[me.plot]||PLOTS[DEF];T3.px=P.x;T3.pz=P.z;
+ if(!T3.cam0){T3.cam0=1;T3.t.set(P.x/2,5,P.z/2)}
+}
+function showCity(on){
+ on=on||wide();const w=document.getElementById("city");document.body.classList.toggle("city",on);w.style.display=on?"block":"none";
+ if(!on){if(T3)T3.on=false;return}
+ if(typeof THREE==="undefined"){w.innerHTML='<div class="soon"><span>📡</span><p class="m">3D uchun internet kerak</p></div>';return}
+ try{if(!T3)initCity();T3.fit();T3.on=true;syncShops();if(!T3.run){T3.run=true;loop()}}catch(e){w.innerHTML='<div class="soon"><span>⚠️</span><p class="m">'+esc(e.message)+'</p></div>';T3=null}
+}
+function camTo(x,y,z,r){T3.t.set(x,y,z);T3.rad=r}
+function camShop(){camTo(T3.px,3,T3.pz,24)}
+function loop(){try{loop0()}catch(e){T3.on=false;T3.run=false;document.getElementById("city").insertAdjacentHTML("beforeend",'<div class="hint" style="top:140px;bottom:auto;color:#a00">⚠️ '+esc(e.message)+'</div>')}}
+function loop0(){
+ if(!T3.on){T3.run=false;return}
+ T3.n++;if(T3.n%30==0)arrive();
+ const want=Math.min(S.q,14),pp=T3.people;
+ while(pp.children.length<want){const p=mkPerson();p.position.set(T3.px-6+Math.random()*12,0.4,T3.pz+T3.off+Math.random()*3);pp.add(p)}
+ while(pp.children.length>want)pp.remove(pp.children[pp.children.length-1]);
+ pp.children.forEach(p=>{const u=p.userData,dx=u.tx-p.position.x,dz=u.tz-p.position.z,d=Math.hypot(dx,dz);if(d<.2){u.tx=T3.px-6+Math.random()*12;u.tz=T3.pz+T3.off+Math.random()*3}else{p.position.x+=dx/d*u.sp*3;p.position.z+=dz/d*u.sp*3;p.rotation.y=Math.atan2(dx,dz)}p.position.y=.3+Math.abs(Math.sin(T3.n*.2+u.sp*500))*.08});
+ T3.cars.forEach(c=>{const u=c.userData,k=u.ax=="x"?"x":"z";c.position[k]+=u.dir*u.sp;if(Math.abs(c.position[k])>98)c.position[k]=-Math.sign(c.position[k])*98});
+ const a=T3.az,o=T3.pol,r=T3.rad,t=T3.t;
+ T3.cam.position.set(t.x+r*Math.sin(o)*Math.sin(a),t.y+r*Math.cos(o),t.z+r*Math.sin(o)*Math.cos(a));T3.cam.lookAt(t);
+ T3.r.render(T3.sc,T3.cam);requestAnimationFrame(loop);
+}
+render();ui();sync();
+</script>
+</body>
+</html>
